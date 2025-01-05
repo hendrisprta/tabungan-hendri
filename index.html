@@ -1,0 +1,141 @@
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aplikasi Buku Tabungan</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            padding: 0;
+        }
+        table {
+            width: 100%;
+            margin-top: 20px;
+            border-collapse: collapse;
+        }
+        table, th, td {
+            border: 1px solid #ccc;
+        }
+        th, td {
+            padding: 10px;
+            text-align: center;
+        }
+        th {
+            background-color: #f4f4f4;
+        }
+        .form-container {
+            margin-top: 20px;
+        }
+        .form-container input {
+            margin: 5px;
+            padding: 5px;
+        }
+        .form-container button {
+            padding: 5px 10px;
+            margin: 5px;
+        }
+        .total-amount {
+            margin-top: 20px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>Aplikasi Buku Tabungan</h1>
+
+    <div class="form-container">
+        <input type="date" id="date" placeholder="Tanggal">
+        <input type="text" id="description" placeholder="Deskripsi">
+        <input type="number" id="amount" placeholder="Jumlah">
+        <button onclick="addTransaction()">Tambah Transaksi</button>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Tanggal</th>
+                <th>Deskripsi</th>
+                <th>Jumlah</th>
+                <th>Aksi</th>
+            </tr>
+        </thead>
+        <tbody id="transactionTable"></tbody>
+    </table>
+
+    <div class="total-amount">
+        Total Tabungan: <span id="totalAmount">0</span>
+    </div>
+
+    <script>
+        function saveDataToLocalStorage(data) {
+            localStorage.setItem('transactions', JSON.stringify(data));
+        }
+
+        function loadDataFromLocalStorage() {
+            return JSON.parse(localStorage.getItem('transactions')) || [];
+        }
+
+        function calculateTotalAmount(transactions) {
+            return transactions.reduce((total, transaction) => total + parseInt(transaction.amount), 0);
+        }
+
+        function formatCurrency(amount) {
+            return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(amount);
+        }
+
+        function addTransaction() {
+            const date = document.getElementById('date').value;
+            const description = document.getElementById('description').value;
+            const amount = document.getElementById('amount').value;
+
+            if (date && description && amount) {
+                const transactions = loadDataFromLocalStorage();
+                transactions.push({ date, description, amount });
+                saveDataToLocalStorage(transactions);
+                renderTransactions(transactions);
+                document.getElementById('date').value = '';
+                document.getElementById('description').value = '';
+                document.getElementById('amount').value = '';
+            } else {
+                alert('Harap isi semua kolom!');
+            }
+        }
+
+        function deleteTransaction(index) {
+            const transactions = loadDataFromLocalStorage();
+            transactions.splice(index, 1);
+            saveDataToLocalStorage(transactions);
+            renderTransactions(transactions);
+        }
+
+        function renderTransactions(transactions) {
+            const transactionTable = document.getElementById('transactionTable');
+            const totalAmount = document.getElementById('totalAmount');
+            transactionTable.innerHTML = '';
+
+            transactions.forEach((transaction, index) => {
+                transactionTable.innerHTML += `
+                    <tr>
+                        <td>${transaction.date}</td>
+                        <td>${transaction.description}</td>
+                        <td>${formatCurrency(transaction.amount)}</td>
+                        <td>
+                            <button onclick="deleteTransaction(${index})">Hapus</button>
+                        </td>
+                    </tr>
+                `;
+            });
+
+            totalAmount.textContent = formatCurrency(calculateTotalAmount(transactions));
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            renderTransactions(loadDataFromLocalStorage());
+        });
+    </script>
+</body>
+</html>
