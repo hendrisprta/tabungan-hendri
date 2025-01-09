@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -29,7 +28,7 @@
         .form-container {
             margin-top: 20px;
         }
-        .form-container input {
+        .form-container input, .form-container select {
             margin: 5px;
             padding: 5px;
         }
@@ -42,6 +41,12 @@
             font-size: 18px;
             font-weight: bold;
         }
+        .income {
+            color: green;
+        }
+        .expense {
+            color: red;
+        }
     </style>
 </head>
 <body>
@@ -51,6 +56,10 @@
         <input type="date" id="date" placeholder="Tanggal">
         <input type="text" id="description" placeholder="Deskripsi">
         <input type="number" id="amount" placeholder="Jumlah">
+        <select id="type">
+            <option value="income">Pemasukan</option>
+            <option value="expense">Pengeluaran</option>
+        </select>
         <button onclick="addTransaction()">Tambah Transaksi</button>
     </div>
 
@@ -59,6 +68,7 @@
             <tr>
                 <th>Tanggal</th>
                 <th>Deskripsi</th>
+                <th>Jenis</th>
                 <th>Jumlah</th>
                 <th>Aksi</th>
             </tr>
@@ -80,7 +90,11 @@
         }
 
         function calculateTotalAmount(transactions) {
-            return transactions.reduce((total, transaction) => total + parseInt(transaction.amount), 0);
+            return transactions.reduce((total, transaction) => {
+                return transaction.type === 'income'
+                    ? total + parseInt(transaction.amount)
+                    : total - parseInt(transaction.amount);
+            }, 0);
         }
 
         function formatCurrency(amount) {
@@ -91,10 +105,11 @@
             const date = document.getElementById('date').value;
             const description = document.getElementById('description').value;
             const amount = document.getElementById('amount').value;
+            const type = document.getElementById('type').value;
 
             if (date && description && amount) {
                 const transactions = loadDataFromLocalStorage();
-                transactions.push({ date, description, amount });
+                transactions.push({ date, description, amount, type });
                 saveDataToLocalStorage(transactions);
                 renderTransactions(transactions);
                 document.getElementById('date').value = '';
@@ -122,7 +137,8 @@
                     <tr>
                         <td>${transaction.date}</td>
                         <td>${transaction.description}</td>
-                        <td>${formatCurrency(transaction.amount)}</td>
+                        <td class="${transaction.type}">${transaction.type === 'income' ? 'Pemasukan' : 'Pengeluaran'}</td>
+                        <td class="${transaction.type}">${formatCurrency(transaction.amount)}</td>
                         <td>
                             <button onclick="deleteTransaction(${index})">Hapus</button>
                         </td>
