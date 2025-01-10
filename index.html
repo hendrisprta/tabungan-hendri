@@ -3,20 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aplikasi Buku Tabungan</title>
+    <title>Aplikasi Buku Tabungan Henri</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body {
             font-family: Arial, sans-serif;
             margin: 20px;
-            padding: 0;
         }
         table {
             width: 100%;
             margin-top: 20px;
             border-collapse: collapse;
-        }
-        table, th, td {
-            border: 1px solid #ccc;
         }
         th, td {
             padding: 10px;
@@ -25,16 +22,8 @@
         th {
             background-color: #f4f4f4;
         }
-        .form-container {
-            margin-top: 20px;
-        }
         .form-container input, .form-container select {
-            margin: 5px;
-            padding: 5px;
-        }
-        .form-container button {
-            padding: 5px 10px;
-            margin: 5px;
+            margin-bottom: 10px;
         }
         .total-amount {
             margin-top: 20px;
@@ -50,40 +39,75 @@
     </style>
 </head>
 <body>
- 
-<h1>
-    <img src="henri.png" alt="Logo" style="width: 50px; height: 50px; margin-right: 10px; vertical-align: middle;">
-    Aplikasi Buku Tabungan Henri
-</h1>
+    <h1 class="text-center">
+        <img src="henri.png" alt="Logo" style="width: 50px; height: 50px; margin-right: 10px; vertical-align: middle;">
+        Aplikasi Buku Tabungan Henri🙄
+    </h1>
 
-    <div class="form-container">
-        <input type="date" id="date" placeholder="Tanggal">
-        <input type="text" id="description" placeholder="Deskripsi">
-        <input type="number" id="amount" placeholder="Jumlah">
-        <select id="type">
-            <option value="income">Pemasukan</option>
-            <option value="expense">Pengeluaran</option>
-        </select>
-        <button onclick="addTransaction()">Tambah Transaksi</button>
+    <div class="container">
+        <!-- Form Tambah Transaksi -->
+        <div class="form-container row g-2">
+            <div class="col-12 col-sm-6 col-lg-3">
+                <input type="date" id="date" class="form-control" placeholder="Tanggal">
+            </div>
+            <div class="col-12 col-sm-6 col-lg-3">
+                <input type="text" id="description" class="form-control" placeholder="Deskripsi">
+            </div>
+            <div class="col-12 col-sm-6 col-lg-3">
+                <input type="number" id="amount" class="form-control" placeholder="Jumlah">
+            </div>
+            <div class="col-12 col-sm-6 col-lg-3">
+                <select id="type" class="form-select">
+                    <option value="income">Pemasukan</option>
+                    <option value="expense">Pengeluaran</option>
+                </select>
+            </div>
+            <div class="col-12 text-center mt-3">
+                <button onclick="addTransaction()" class="btn btn-primary w-100">Tambah Transaksi</button>
+            </div>
+        </div>
+
+        <!-- Tabel Transaksi -->
+        <div class="table-responsive mt-4">
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>Tanggal</th>
+                        <th>Deskripsi</th>
+                        <th>Jenis</th>
+                        <th>Jumlah</th>
+                        <th>Aksi</th>
+                    </tr>
+                </thead>
+                <tbody id="transactionTable"></tbody>
+            </table>
+        </div>
+
+        <!-- Total Tabungan -->
+        <div class="total-amount text-center">
+            Total Tabungan: <span id="totalAmount">Rp 0</span>
+        </div>
     </div>
 
-    <table>
-        <thead>
-            <tr>
-                <th>Tanggal</th>
-                <th>Deskripsi</th>
-                <th>Jenis</th>
-                <th>Jumlah</th>
-                <th>Aksi</th>
-            </tr>
-        </thead>
-        <tbody id="transactionTable"></tbody>
-    </table>
-
-    <div class="total-amount">
-        Total Tabungan: <span id="totalAmount">0</span>
+    <!-- Modal -->
+    <div class="modal fade" id="successModal" tabindex="-1" aria-labelledby="successModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title" id="successModalLabel">Transaksi Berhasil</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    🦖 Tabungan berhasil ditambah, semangat menabung! ✅
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-success" data-bs-dismiss="modal">Oke</button>
+                </div>
+            </div>
+        </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         function saveDataToLocalStorage(data) {
             localStorage.setItem('transactions', JSON.stringify(data));
@@ -102,7 +126,7 @@
         }
 
         function formatCurrency(amount) {
-            return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(amount);
+            return "Rp " + new Intl.NumberFormat('id-ID', { maximumFractionDigits: 0 }).format(amount);
         }
 
         function addTransaction() {
@@ -116,19 +140,25 @@
                 transactions.push({ date, description, amount, type });
                 saveDataToLocalStorage(transactions);
                 renderTransactions(transactions);
+
                 document.getElementById('date').value = '';
                 document.getElementById('description').value = '';
                 document.getElementById('amount').value = '';
+
+                const successModal = new bootstrap.Modal(document.getElementById('successModal'));
+                successModal.show();
             } else {
                 alert('Harap isi semua kolom!');
             }
         }
 
         function deleteTransaction(index) {
-            const transactions = loadDataFromLocalStorage();
-            transactions.splice(index, 1);
-            saveDataToLocalStorage(transactions);
-            renderTransactions(transactions);
+            if (confirm('Apakah Anda yakin ingin menghapus transaksi ini?')) {
+                const transactions = loadDataFromLocalStorage();
+                transactions.splice(index, 1);
+                saveDataToLocalStorage(transactions);
+                renderTransactions(transactions);
+            }
         }
 
         function renderTransactions(transactions) {
@@ -144,7 +174,7 @@
                         <td class="${transaction.type}">${transaction.type === 'income' ? 'Pemasukan' : 'Pengeluaran'}</td>
                         <td class="${transaction.type}">${formatCurrency(transaction.amount)}</td>
                         <td>
-                            <button onclick="deleteTransaction(${index})">Hapus</button>
+                            <button onclick="deleteTransaction(${index})" class="btn btn-danger btn-sm">Hapus</button>
                         </td>
                     </tr>
                 `;
